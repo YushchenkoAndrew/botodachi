@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
+import { Ping } from "./interfaces/ping.interface";
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  pingPong(): Ping {
+    return { message: "pong" };
   }
 }
