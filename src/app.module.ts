@@ -6,6 +6,7 @@ import { CronService } from "./cron/cron.service";
 import { CronModule } from "./cron/cron.module";
 import { HttpModule } from "@nestjs/axios";
 import { ConfigModule } from "@nestjs/config";
+import { DiscordBotModule } from "./discord-bot/discord-bot.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ConfigModule } from "@nestjs/config";
     ConfigModule.forRoot(),
     CronModule,
     HttpModule,
+    DiscordBotModule,
   ],
   controllers: [AppController],
   providers: [AppService, CronService],

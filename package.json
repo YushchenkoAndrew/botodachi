@@ -27,6 +27,9 @@
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/schedule": "^1.0.1",
+    "axios": "^0.21.4",
+    "discord-nestjs": "^1.2.1",
+    "discord.js": "^12.5.3",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"
