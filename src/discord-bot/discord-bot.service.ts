@@ -1,7 +1,7 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
 import { DiscordClientProvider } from "discord-nestjs";
-import { Message } from "discord.js";
+import { Message, TextChannel } from "discord.js";
 import { lastValueFrom } from "rxjs";
 
 @Injectable()
