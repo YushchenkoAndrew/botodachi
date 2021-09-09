@@ -8,19 +8,19 @@ export class CronService {
 
   constructor(private httpService: HttpService) {}
 
-  @Cron("*/1 * * * * *")
+  @Cron("*/10 * * * * *")
   testCron() {
-    this.httpService.get(`http://${process.env.API_HOST}/api/ping`).subscribe(
-      (data) => console.log(data.data),
-      (err) => console.log(err),
-    );
+    // this.httpService.get(`http://${process.env.API_HOST}/api/ping`).subscribe(
+    //   (data) => console.log(data.data),
+    //   (err) => console.log(err),
+    // );
 
-    this.httpService
-      .get(`http://${process.env.WEB_HOST}/projects/api/ping`)
-      .subscribe(
-        (data) => console.log(data.data),
-        (err) => console.log(err),
-      );
+    // this.httpService
+    //   .get(`http://${process.env.WEB_HOST}/projects/api/ping`)
+    //   .subscribe(
+    //     (data) => console.log(data.data),
+    //     (err) => console.log(err),
+    //   );
 
     this.logger.log("Pass 5 sec");
   }
