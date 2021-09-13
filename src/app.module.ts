@@ -7,6 +7,8 @@ import { CronModule } from "./cron/cron.module";
 import { HttpModule } from "@nestjs/axios";
 import { ConfigModule } from "@nestjs/config";
 import { DiscordBotModule } from "./discord-bot/discord-bot.module";
+import { LogsController } from './logs/logs.controller';
+import { LogsService } from './logs/logs.service';
 
 @Module({
   imports: [
@@ -16,7 +18,7 @@ import { DiscordBotModule } from "./discord-bot/discord-bot.module";
     HttpModule,
     DiscordBotModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, CronService],
+  controllers: [AppController, LogsController],
+  providers: [AppService, CronService, LogsService],
 })
 export class AppModule {}

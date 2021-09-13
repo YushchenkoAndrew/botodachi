@@ -13,7 +13,7 @@ export class CronService {
 
   constructor(private httpService: HttpService) {}
 
-  @Cron("*/10 * * * * *")
+  @Cron("*/50 * * * * *")
   testCron() {
     // this.httpService.get(`http://${process.env.API_HOST}/api/ping`).subscribe(
     //   (data) => console.log(data.data),
@@ -28,6 +28,6 @@ export class CronService {
     //   );
 
     this.logger.log("Pass 5 sec");
-    this.discordLogger.send("Pass 5 sec");
+    // this.discordLogger.send("Pass 5 sec");
   }
 }
