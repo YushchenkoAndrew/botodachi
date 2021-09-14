@@ -8,10 +8,17 @@ export class MessageDto {
   @IsString()
   name: string;
 
+  @IsOptional()
+  @IsString()
+  url: string;
+
+  @IsOptional()
+  @IsString()
+  file: string;
+
   @IsString()
   message: string;
 
   @IsOptional()
-  @IsString()
-  desc: string;
+  desc: any;
 }

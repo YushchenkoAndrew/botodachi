@@ -2,6 +2,7 @@ import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import { WebhookClient } from "discord.js";
+import { lastValueFrom } from "rxjs";
 
 @Injectable()
 export class CronService {
@@ -13,21 +14,36 @@ export class CronService {
 
   constructor(private httpService: HttpService) {}
 
-  @Cron("*/50 * * * * *")
+  private handlePing(url: string): Promise<string> {
+    return lastValueFrom(this.httpService.get(url))
+      .then((res) => res.data.message)
+      .catch(() => "Unable to reach");
+  }
+
+  @Cron("00 00 00 */1 * *")
   testCron() {
-    // this.httpService.get(`http://${process.env.API_HOST}/api/ping`).subscribe(
-    //   (data) => console.log(data.data),
-    //   (err) => console.log(err),
-    // );
+    this.discordLogger.send(
+      "```css\n[" + Date().toString() + "]``````yaml\nbotodachi: pong\n```",
+    );
+    this.handlePing(`http://${process.env.WEB_HOST}/projects/api/ping`).then(
+      (res) => this.discordLogger.send("```yaml\nweb: " + res + "\n```"),
+    );
+    this.handlePing(`http://${process.env.API_HOST}/api/ping`).then((res) =>
+      this.discordLogger.send("```yaml\napi: " + res + "\n```"),
+    );
+  }
 
-    // this.httpService
-    //   .get(`http://${process.env.WEB_HOST}/projects/api/ping`)
-    //   .subscribe(
-    //     (data) => console.log(data.data),
-    //     (err) => console.log(err),
-    //   );
+  @Cron("* 59 */3 * * *")
+  updatePsqlData() {
+    this.httpService.post(
+      `http://${process.env.WEB_HOST}/projects/api/cache/upload?key=${process.env.WEB_KEY}`,
+    );
+  }
 
-    this.logger.log("Pass 5 sec");
-    // this.discordLogger.send("Pass 5 sec");
+  @Cron("00 00 00 */1 * *")
+  resetWebData() {
+    this.httpService.post(
+      `http://${process.env.WEB_HOST}/projects/api/cache/reset?key=${process.env.WEB_KEY}`,
+    );
   }
 }
