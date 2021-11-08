@@ -27,10 +27,10 @@ export class DiscordBotService {
 
   getCurrStatus(message: Message): void {
     message.channel.send("```yaml\nbotodachi: pong\n```");
-    this.handlePing(`http://${process.env.WEB_HOST}/projects/api/ping`).then(
-      (res) => message.channel.send("```yaml\nweb: " + res + "\n```"),
+    this.handlePing(`${process.env.WEB_URL}/api/ping`).then((res) =>
+      message.channel.send("```yaml\nweb: " + res + "\n```"),
     );
-    this.handlePing(`http://${process.env.API_HOST}/api/ping`).then((res) =>
+    this.handlePing(`${process.env.API_URL}/ping`).then((res) =>
       message.channel.send("```yaml\napi: " + res + "\n```"),
     );
   }

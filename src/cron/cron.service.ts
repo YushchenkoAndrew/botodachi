@@ -25,10 +25,10 @@ export class CronService {
     this.discordLogger.send(
       "```css\n[" + Date().toString() + "]``````yaml\nbotodachi: pong\n```",
     );
-    this.handlePing(`http://${process.env.WEB_HOST}/projects/api/ping`).then(
-      (res) => this.discordLogger.send("```yaml\nweb: " + res + "\n```"),
+    this.handlePing(`${process.env.WEB_URL}/api/ping`).then((res) =>
+      this.discordLogger.send("```yaml\nweb: " + res + "\n```"),
     );
-    this.handlePing(`http://${process.env.API_HOST}/api/ping`).then((res) =>
+    this.handlePing(`${process.env.API_URL}/ping`).then((res) =>
       this.discordLogger.send("```yaml\napi: " + res + "\n```"),
     );
   }
@@ -36,14 +36,14 @@ export class CronService {
   @Cron("* 59 */3 * * *")
   updatePsqlData() {
     this.httpService.post(
-      `http://${process.env.WEB_HOST}/projects/api/cache/upload?key=${process.env.WEB_KEY}`,
+      `${process.env.WEB_URL}/api/cache/upload?key=${process.env.WEB_KEY}`,
     );
   }
 
   @Cron("00 00 00 */1 * *")
   resetWebData() {
     this.httpService.post(
-      `http://${process.env.WEB_HOST}/projects/api/cache/reset?key=${process.env.WEB_KEY}`,
+      `${process.env.WEB_URL}/api/cache/reset?key=${process.env.WEB_KEY}`,
     );
   }
 }
