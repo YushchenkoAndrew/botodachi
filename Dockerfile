@@ -1,29 +1,31 @@
-FROM node:12.14.1-alpine AS builder
-RUN apk add g++ make python
+# Builder
+FROM node:14-alpine AS builder
 
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm ci
-COPY . ./
-# build js & remove devDependencies from node_modules
+
+COPY . .
 RUN npm run build && npm prune --production
 
 
-FROM node:alpine AS runner
+# Runner
+FROM node:14-alpine AS runner
+
+WORKDIR /app
+
+RUN addgroup -g 1001 -S nestjs
+RUN adduser -S nestjs -u 1001
+
+COPY --from=builder --chown=nestjs:nestjs /app/dist /app/dist
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/package*.json /app/
+
+USER nestjs
+EXPOSE 3000
 
 ENV PORT=3000
 ENV NODE_ENV=production
-WORKDIR /app
 
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/node_modules /app/node_modules
-
-# Migrations compiled while npm run build was call
-# RUN rm -rf /app/dist/migrations/*.d.ts /app/dist/migrations/*.map
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/scripts/wait-for-it.sh /app/wait-for-it.sh
-RUN chmod +x wait-for.sh
-
-EXPOSE 3000
-ENTRYPOINT [ "node" ]
-CMD [ "dist/main.js" ]
+CMD ["node", "dist/src/main"]
