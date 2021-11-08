@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-deployment
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: botodachi
+  template:
+    metadata:
+      labels:
+        app: botodachi
+    spec:
+      containers:
+        - name: botodachi
+          image: grimreapermortis/botodachi:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+          - secretRef:
+              name: bot-secrete
+          env:
+            - name: WEB_URL
+              value: http://$(WEB_SERVICE_SERVICE_HOST):$(WEB_SERVICE_SERVICE_PORT)/projects
+            - name: API_URL
+              value: http://$(API_SERVICE_SERVICE_HOST):$(API_SERVICE_SERVICE_PORT)/api
+            - name: VOID_URL
+              value: http://$(VOID_SERVICE_SERVICE_HOST):$(VOID_SERVICE_SERVICE_PORT)/files
