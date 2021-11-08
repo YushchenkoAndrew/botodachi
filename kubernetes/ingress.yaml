@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: bot-ingress
@@ -17,9 +17,6 @@ spec:
       http:
         paths:
           - backend:
-              service:
-                name: web-service
-                port: 
-                  number: 3000
+              serviceName: bot-service
+              servicePort: 3000
             path: /bot
-            pathType: Exact

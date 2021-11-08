@@ -20,8 +20,8 @@ spec:
           ports:
             - containerPort: 3000
           envFrom:
-          - secretRef:
-              name: bot-secrete
+            - secretRef:
+                name: bot-secrete
           env:
             - name: WEB_URL
               value: http://$(WEB_SERVICE_SERVICE_HOST):$(WEB_SERVICE_SERVICE_PORT)/v2/projects
