@@ -24,7 +24,7 @@ spec:
               name: bot-secrete
           env:
             - name: WEB_URL
-              value: http://$(WEB_SERVICE_SERVICE_HOST):$(WEB_SERVICE_SERVICE_PORT)/projects
+              value: http://$(WEB_SERVICE_SERVICE_HOST):$(WEB_SERVICE_SERVICE_PORT)/v2/projects
             - name: API_URL
               value: http://$(API_SERVICE_SERVICE_HOST):$(API_SERVICE_SERVICE_PORT)/api
             - name: VOID_URL
