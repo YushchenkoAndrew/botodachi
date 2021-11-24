@@ -2,6 +2,7 @@ import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import { WebhookClient } from "discord.js";
+import md5 from "lib/md5";
 import { lastValueFrom } from "rxjs";
 
 @Injectable()
@@ -11,6 +12,10 @@ export class CronService {
     process.env.DISCORD_WEBHOOK_ID,
     process.env.DISCORD_WEBHOOK_TOKEN,
   );
+
+  private readonly webUrl = process.env.WEB_URL;
+  private readonly webKey = process.env.WEB_KEY;
+  private readonly webPepper = process.env.WEB_PEPPER;
 
   constructor(private httpService: HttpService) {}
 
@@ -35,15 +40,25 @@ export class CronService {
 
   @Cron("* 59 */3 * * *")
   updatePsqlData() {
+    const salt = md5((Math.random() * 10000 + 500).toString());
     this.httpService.post(
-      `${process.env.WEB_URL}/api/cache/upload?key=${process.env.WEB_KEY}`,
+      `${this.webUrl}/api/cache/upload?key=${md5(
+        salt + this.webPepper + this.webKey,
+      )}`,
+      "",
+      { headers: { ["X-Custom-Header"]: salt } },
     );
   }
 
   @Cron("00 00 00 */1 * *")
   resetWebData() {
+    const salt = md5((Math.random() * 10000 + 500).toString());
     this.httpService.post(
-      `${process.env.WEB_URL}/api/cache/reset?key=${process.env.WEB_KEY}`,
+      `${this.webUrl}/api/cache/reset?key=${md5(
+        salt + this.webPepper + this.webKey,
+      )}`,
+      "",
+      { headers: { ["X-Custom-Header"]: salt } },
     );
   }
 }
