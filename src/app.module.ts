@@ -2,13 +2,14 @@ import { Module } from "@nestjs/common";
 import { ScheduleModule } from "@nestjs/schedule";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { CronService } from "./cron/cron.service";
 import { CronModule } from "./cron/cron.module";
 import { HttpModule } from "@nestjs/axios";
 import { ConfigModule } from "@nestjs/config";
 import { DiscordBotModule } from "./discord-bot/discord-bot.module";
-import { LogsController } from './logs/logs.controller';
-import { LogsService } from './logs/logs.service';
+import { LogsModule } from "./logs/logs.module";
+import { WebModule } from "./web/web.module";
+import { ApiModule } from "./api/api.module";
+import { VoidModule } from "./void/void.module";
 
 @Module({
   imports: [
@@ -17,8 +18,12 @@ import { LogsService } from './logs/logs.service';
     CronModule,
     HttpModule,
     DiscordBotModule,
+    LogsModule,
+    WebModule,
+    ApiModule,
+    VoidModule,
   ],
-  controllers: [AppController, LogsController],
-  providers: [AppService, CronService, LogsService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -8,10 +8,6 @@ import { lastValueFrom } from "rxjs";
 @Injectable()
 export class CronService {
   private readonly logger = new Logger(CronService.name);
-  private readonly discordLogger = new WebhookClient(
-    process.env.DISCORD_WEBHOOK_ID,
-    process.env.DISCORD_WEBHOOK_TOKEN,
-  );
 
   private readonly webUrl = process.env.WEB_URL;
   private readonly webKey = process.env.WEB_KEY;
@@ -27,15 +23,15 @@ export class CronService {
 
   @Cron("00 00 00 */1 * *")
   testCron() {
-    this.discordLogger.send(
-      "```css\n[" + Date().toString() + "]``````yaml\nbotodachi: pong\n```",
-    );
-    this.handlePing(`${process.env.WEB_URL}/api/ping`).then((res) =>
-      this.discordLogger.send("```yaml\nweb: " + res + "\n```"),
-    );
-    this.handlePing(`${process.env.API_URL}/ping`).then((res) =>
-      this.discordLogger.send("```yaml\napi: " + res + "\n```"),
-    );
+    // this.discordLogger.send(
+    //   "```css\n[" + Date().toString() + "]``````yaml\nbotodachi: pong\n```",
+    // );
+    // this.handlePing(`${process.env.WEB_URL}/api/ping`).then((res) =>
+    //   this.discordLogger.send("```yaml\nweb: " + res + "\n```"),
+    // );
+    // this.handlePing(`${process.env.API_URL}/ping`).then((res) =>
+    //   this.discordLogger.send("```yaml\napi: " + res + "\n```"),
+    // );
   }
 
   @Cron("* 59 */3 * * *")

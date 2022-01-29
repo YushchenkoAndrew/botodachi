@@ -1,4 +1,4 @@
-export interface Ping {
+export class PingWebDto {
   status: "OK" | "ERR";
   message: string;
 }

@@ -1,22 +1,25 @@
+import { discordClientProvider } from "./discord-bot.provider";
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
-import { DiscordModule, TransformPipe } from "discord-nestjs";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 import { DiscordBotGateway } from "./discord-bot.gateway";
 import { DiscordBotService } from "./discord-bot.service";
+import config from "../../config/discord-bot";
+import { ConfigModule } from "@nestjs/config";
+import { WebModule } from "src/web/web.module";
+import { ApiModule } from "src/api/api.module";
+import { VoidModule } from "src/void/void.module";
 
 @Module({
   imports: [
-    DiscordModule.forRoot({
-      token: process.env.DISCORD_TOKEN,
-      commandPrefix: "$",
-      webhook: {
-        webhookId: process.env.DISCORD_WEBHOOK_ID,
-        webhookToken: process.env.DISCORD_TOKEN,
-      },
-      // usePipes: [TransformPipe, ValidationPipe],
-    }),
+    EventEmitterModule.forRoot(),
+    ConfigModule.forRoot({ load: [config] }),
     HttpModule,
+    WebModule,
+    ApiModule,
+    VoidModule,
   ],
-  providers: [DiscordBotGateway, DiscordBotService],
+  providers: [discordClientProvider, DiscordBotGateway, DiscordBotService],
+  exports: [discordClientProvider],
 })
 export class DiscordBotModule {}

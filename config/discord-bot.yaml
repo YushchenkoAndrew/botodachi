@@ -1,0 +1,37 @@
+commands:
+  - name: ping
+    description: Pings all services
+
+  - name: web
+    description: Execute specific operation on WebServer
+    options:
+      - type: 1
+        name: cache-run
+        description: Run Redis command
+        options:
+          - type: 3
+            name: command
+            description: Redis command
+            required: true
+
+      - type: 1
+        name: cache-upload
+        description: Flush Web cache to API
+        options: []
+
+      - type: 1
+        name: cache-clear
+        description: Clear Web cache
+        options: []
+
+  - name: api
+    description: Execute specific operation on ApiServer
+    options:
+      - type: 1
+        name: cache-run
+        description: Run Redis command
+        options:
+          - type: 3
+            name: command
+            description: Redis command
+            required: true
