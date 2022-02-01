@@ -29,7 +29,6 @@ export class DiscordBotGateway {
         process.env.DISCORD_TOKEN,
       );
 
-      console.dir(configService.get("commands"), { depth: null });
       await rest.put(
         Routes.applicationCommands(process.env.BOT_APPLICATION_ID),
         { body: configService.get("commands") },
@@ -55,32 +54,11 @@ export class DiscordBotGateway {
     const data = new SlashCommandBuilder()
       .setName("ping")
       .setDescription("Replies with Pong!")
-      .addStringOption((option) =>
-        option
-          .setName("input")
-          .setDescription("Enter a string")
-          .setChoices([
-            ["test", "Yes"],
-            ["hello", "world"],
-          ]),
-      );
-    const data2 = new SlashCommandBuilder()
-      .setName("info")
-      .setDescription("Get info about a user or a server!")
-      .addSubcommand((subcommand) =>
-        subcommand
-          .setName("user")
-          .setDescription("Info about a user")
-          .addUserOption((option) =>
-            option.setName("target").setDescription("The user"),
-          ),
-      )
-      .addSubcommand((subcommand) =>
-        subcommand.setName("server").setDescription("Info about the server"),
+      .addIntegerOption((option) =>
+        option.setName("input").setDescription("Enter a string"),
       );
 
     console.dir(data.toJSON(), { depth: null });
-    console.dir(data2.toJSON(), { depth: null });
   }
 
   @OnEvent("ready")

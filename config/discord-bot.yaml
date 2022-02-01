@@ -5,9 +5,12 @@ commands:
   - name: meme
     description: Send one of the top meme from subreddit
     options:
-      - type: 3
-        name: max
-        description: Max number of memes
+      - type: 4
+        name: number
+        min_value: 1
+        max_value: 100
+        description: Number of memes to show
+        required: true
 
   - name: web
     description: Execute specific operation on WebServer

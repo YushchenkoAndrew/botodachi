@@ -1,4 +1,11 @@
-import { Injectable, Logger } from "@nestjs/common";
+import {
+  CacheInterceptor,
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  Logger,
+  UseInterceptors,
+} from "@nestjs/common";
 import {
   CacheType,
   CommandInteraction,
@@ -10,6 +17,7 @@ import { WebService } from "src/web/web.service";
 import { ApiService } from "src/api/api.service";
 import { VoidService } from "src/void/void.service";
 import { RedditService } from "src/reddit/reddit.service";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class DiscordBotService {
@@ -20,6 +28,7 @@ export class DiscordBotService {
     private readonly apiService: ApiService,
     private readonly voidService: VoidService,
     private readonly redditService: RedditService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   init(channel: TextChannel): Promise<Message> {
@@ -45,22 +54,28 @@ export class DiscordBotService {
     );
   }
 
-  getMemes(message: CommandInteraction<CacheType>) {
+  @UseInterceptors(CacheInterceptor)
+  async getMemes(message: CommandInteraction<CacheType>) {
     message.reply("Loading...");
+
+    let lastID = (await this.cacheManager.get<string>("REDDIT_AFTER")) ?? "";
     return new Promise<Message | void>((resolve) => {
       this.redditService
-        .getPostFromSubreddit("goodanimemes", "top", 200)
-        .then((result) => {
+        .getPostFromSubreddit("goodanimemes", "top.json", lastID, 100)
+        .then(async (result) => {
           let count = 0;
           for (let child of result.data?.children ?? []) {
-            if (!(child.data.url ?? "").includes("jpg")) continue;
+            if (child.kind !== "t3") continue;
 
-            // console.log(child);
+            lastID = `t3_${child.data.id}`;
             message.channel.send({
               files: [child.data.url],
             } as MessagePayload);
 
-            if (count++ >= Number(message.options.getString("max"))) {
+            if (++count >= message.options.getInteger("number")) {
+              await this.cacheManager.set("REDDIT_AFTER", lastID, {
+                ttl: 3600,
+              });
               return resolve();
             }
           }

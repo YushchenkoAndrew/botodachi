@@ -1,6 +1,6 @@
 import { discordClientProvider } from "./discord-bot.provider";
 import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
+import { CacheModule, Module } from "@nestjs/common";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { DiscordBotGateway } from "./discord-bot.gateway";
 import { DiscordBotService } from "./discord-bot.service";
@@ -15,6 +15,7 @@ import { RedditModule } from "src/reddit/reddit.module";
   imports: [
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ load: [config] }),
+    CacheModule.register(),
     HttpModule,
     WebModule,
     ApiModule,
