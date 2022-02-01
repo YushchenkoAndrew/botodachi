@@ -11,7 +11,7 @@ export class LogsService {
   ) {}
 
   logMessage(stat: string, body: MessageDto): Promise<Message | void> {
-    return new Promise<Message | void>(async (resolve, reject) => {
+    return new Promise<Message | void>((resolve) => {
       this.client.channels
         .fetch(process.env.DISCORD_GENERAL_CH)
         .then((channel: TextChannel) =>

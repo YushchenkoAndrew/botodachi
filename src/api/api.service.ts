@@ -6,6 +6,7 @@ import md5 from "lib/md5";
 import { lastValueFrom } from "rxjs";
 import { PingApiDto } from "./dto/ping.dto";
 import { TokenDto } from "./dto/token.dto";
+import { ErrorDto } from "./dto/error.dto";
 
 @Injectable()
 export class ApiService {
@@ -41,7 +42,7 @@ export class ApiService {
                 { headers: { "content-type": "application/json" } },
               ),
             )
-              .then((res: AxiosResponse<TokenDto>) => {
+              .then((res: AxiosResponse<TokenDto | ErrorDto>) => {
                 // If something wrong with keys or refresh token already
                 // has been expired then just delete them and try again
                 if (res.data.status === "ERR") {
@@ -77,8 +78,8 @@ export class ApiService {
               },
             ),
           )
-            .then((res: AxiosResponse<TokenDto>) => {
-              if (res.data.status == "ERR")
+            .then((res: AxiosResponse<TokenDto | ErrorDto>) => {
+              if (res.data.status === "ERR")
                 return reject("Incorrect user or pass");
 
               this.UpdateTokens(res.data);
@@ -90,10 +91,12 @@ export class ApiService {
     });
   }
 
-  ping(): Promise<string> {
+  ping(): Promise<"pong" | "Unable to reach"> {
     return new Promise((resolve) => {
       lastValueFrom(this.httpService.get(`${process.env.API_URL}/ping`))
-        .then((res: AxiosResponse<PingApiDto>) => resolve(res.data.message))
+        .then((res: AxiosResponse<PingApiDto>) =>
+          resolve(res.status === 200 ? res.data.message : "Unable to reach"),
+        )
         .catch(() => resolve("Unable to reach"));
     });
   }
@@ -115,7 +118,7 @@ export class ApiService {
             .catch((err) => {
               resolve(
                 JSON.stringify(
-                  err?.response?.data || "{'message':'Error'}",
+                  err?.response?.data || '{"message":"Error"}',
                   null,
                   2,
                 ),
@@ -125,7 +128,77 @@ export class ApiService {
         .catch((err) => {
           resolve(
             JSON.stringify(
-              err?.response?.data || "{'message':'Error'}",
+              err?.response?.data || '{"message":"Error"}',
+              null,
+              2,
+            ),
+          );
+        });
+    });
+  }
+
+  getAllK3s(name: string): Promise<string> {
+    return new Promise<string>((resolve) => {
+      this.ApiAuth()
+        .then((token) => {
+          lastValueFrom(
+            this.httpService.get(`${process.env.API_URL}/${name}`, {
+              headers: { Authorization: `Bear ${token}` },
+            }),
+          )
+            .then((res: AxiosResponse<any>) =>
+              resolve(JSON.stringify(res.data, null, 2)),
+            )
+            .catch((err) => {
+              resolve(
+                JSON.stringify(
+                  err?.response?.data || '{"message":"Error"}',
+                  null,
+                  2,
+                ),
+              );
+            });
+        })
+        .catch((err) => {
+          resolve(
+            JSON.stringify(
+              err?.response?.data || '{"message":"Error"}',
+              null,
+              2,
+            ),
+          );
+        });
+    });
+  }
+
+  execPod(id, command: string): Promise<string> {
+    return new Promise<string>((resolve) => {
+      this.ApiAuth()
+        .then((token) => {
+          lastValueFrom(
+            this.httpService.post(
+              `${process.env.API_URL}/k3s/pods/${id}`,
+              command,
+              { headers: { Authorization: `Bear ${token}` } },
+            ),
+          )
+            .then((res: AxiosResponse<any>) =>
+              resolve(JSON.stringify(res.data, null, 2)),
+            )
+            .catch((err) => {
+              resolve(
+                JSON.stringify(
+                  err?.response?.data || '{"message":"Error"}',
+                  null,
+                  2,
+                ),
+              );
+            });
+        })
+        .catch((err) => {
+          resolve(
+            JSON.stringify(
+              err?.response?.data || '{"message":"Error"}',
               null,
               2,
             ),

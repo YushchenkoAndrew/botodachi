@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { Ping } from "./interfaces/ping.interface";
+import { PingEntity } from "./entity/ping.entity";
 
 @Injectable()
 export class AppService {
-  pingPong(): Ping {
+  pingPong(): PingEntity {
     return { stat: "OK", message: "pong" };
   }
 }

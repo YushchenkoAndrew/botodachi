@@ -2,6 +2,13 @@ commands:
   - name: ping
     description: Pings all services
 
+  - name: meme
+    description: Send one of the top meme from subreddit
+    options:
+      - type: 3
+        name: max
+        description: Max number of memes
+
   - name: web
     description: Execute specific operation on WebServer
     options:
@@ -35,3 +42,69 @@ commands:
             name: command
             description: Redis command
             required: true
+
+      - type: 1
+        name: get-all
+        description: Send Get All req to API
+        options:
+          - type: 3
+            name: name
+            description: Name of requested data
+            required: true
+            choices:
+              - name: Deployment
+                value: deployment
+
+              - name: Namespace
+                value: k3s/namespace
+
+              - name: Metric
+                value: k3s/pod
+
+              - name: Service
+                value: k3s/service
+
+              - name: Ingress
+                value: k3s/ingress
+
+              - name: Info
+                value: info
+
+              - name: File
+                value: file
+
+              - name: Link
+                value: link
+
+              - name: Project
+                value: project
+
+              - name: World
+                value: world
+      - type: 1
+        name: exec
+        description: Exec command in Pod
+        options:
+          - type: 3
+            name: id
+            description: Pod id
+            required: true
+
+          - type: 3
+            name: command
+            description: Command that will be exec
+            required: true
+
+  - name: void
+    description: Commands for Void Service
+    options:
+      - type: 1
+        name: link
+        description: Generate link to files location on VoidServer
+        options:
+          - type: 3
+            name: name
+            description: Project name
+            required: true
+            # FIXME: Be able to dynamically update value
+            # choices: []

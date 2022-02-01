@@ -9,6 +9,7 @@ import { ConfigModule } from "@nestjs/config";
 import { WebModule } from "src/web/web.module";
 import { ApiModule } from "src/api/api.module";
 import { VoidModule } from "src/void/void.module";
+import { RedditModule } from "src/reddit/reddit.module";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { VoidModule } from "src/void/void.module";
     WebModule,
     ApiModule,
     VoidModule,
+    RedditModule,
   ],
   providers: [discordClientProvider, DiscordBotGateway, DiscordBotService],
   exports: [discordClientProvider],

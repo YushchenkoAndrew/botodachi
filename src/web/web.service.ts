@@ -10,11 +10,11 @@ import { PingWebDto } from "./dto/ping.dto";
 export class WebService {
   constructor(private readonly httpService: HttpService) {}
 
-  ping(): Promise<string> {
+  ping(): Promise<"pong" | "Unable to reach"> {
     return new Promise((resolve) => {
       lastValueFrom(this.httpService.get(`${process.env.WEB_URL}/api/ping`))
         .then((res: AxiosResponse<PingWebDto>) => {
-          resolve(res.data.message);
+          resolve(res.status === 200 ? res.data.message : "Unable to reach");
         })
         .catch(() => resolve("Unable to reach"));
     });
@@ -38,7 +38,7 @@ export class WebService {
         .catch((err) => {
           resolve(
             JSON.stringify(
-              err?.response?.data || "{'message':'Error'}",
+              err?.response?.data || '{"message":"Error"}',
               null,
               2,
             ),
@@ -63,7 +63,7 @@ export class WebService {
         .catch((err) => {
           resolve(
             JSON.stringify(
-              err?.response?.data || "{'message':'Error'}",
+              err?.response?.data || '{"message":"Error"}',
               null,
               2,
             ),
@@ -90,7 +90,7 @@ export class WebService {
         .catch((err) => {
           resolve(
             JSON.stringify(
-              err?.response?.data || "{'message':'Error'}",
+              err?.response?.data || '{"message":"Error"}',
               null,
               2,
             ),

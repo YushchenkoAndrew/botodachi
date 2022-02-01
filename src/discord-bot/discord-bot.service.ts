@@ -1,37 +1,25 @@
-import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
-import { AxiosResponse } from "axios";
 import {
   CacheType,
   CommandInteraction,
   Message,
+  MessagePayload,
   TextChannel,
 } from "discord.js";
-import { lastValueFrom } from "rxjs";
-import md5 from "lib/md5";
 import { WebService } from "src/web/web.service";
 import { ApiService } from "src/api/api.service";
 import { VoidService } from "src/void/void.service";
+import { RedditService } from "src/reddit/reddit.service";
 
 @Injectable()
 export class DiscordBotService {
   private readonly logger = new Logger(DiscordBotService.name);
 
-  // private readonly webUrl = process.env.WEB_URL;
-  // private readonly webKey = process.env.WEB_KEY;
-  // private readonly webPepper = process.env.WEB_PEPPER;
-
-  // private readonly apiUrl = process.env.API_URL;
-  // private readonly apiUser = process.env.API_USER;
-  // private readonly apiPass = process.env.API_PASS;
-  // private readonly apiPepper = process.env.API_PEPPER;
-
-  // private readonly voidUrl = process.env.VOID_URL;
-
   constructor(
     private readonly webService: WebService,
     private readonly apiService: ApiService,
     private readonly voidService: VoidService,
+    private readonly redditService: RedditService,
   ) {}
 
   init(channel: TextChannel): Promise<Message> {
@@ -55,6 +43,30 @@ export class DiscordBotService {
         this.formatMessage("yaml", "void", await this.voidService.ping()),
       ].join(""),
     );
+  }
+
+  getMemes(message: CommandInteraction<CacheType>) {
+    message.reply("Loading...");
+    return new Promise<Message | void>((resolve) => {
+      this.redditService
+        .getPostFromSubreddit("goodanimemes", "top", 200)
+        .then((result) => {
+          let count = 0;
+          for (let child of result.data?.children ?? []) {
+            if (!(child.data.url ?? "").includes("jpg")) continue;
+
+            // console.log(child);
+            message.channel.send({
+              files: [child.data.url],
+            } as MessagePayload);
+
+            if (count++ >= Number(message.options.getString("max"))) {
+              return resolve();
+            }
+          }
+        })
+        .catch((err) => resolve(message.channel.send(String(err))));
+    });
   }
 
   async webCacheRun(message: CommandInteraction<CacheType>): Promise<void> {
@@ -86,6 +98,44 @@ export class DiscordBotService {
         "api",
         await this.apiService.cacheRun(message.options.getString("command")),
       ),
+    );
+  }
+
+  async apiGetAll(message: CommandInteraction<CacheType>): Promise<void> {
+    return message.reply({
+      files: [
+        {
+          name: "response.json",
+          attachment: Buffer.from(
+            await this.apiService.getAllK3s(message.options.getString("name")),
+            "utf8",
+          ),
+        },
+      ],
+    } as MessagePayload);
+  }
+
+  async apiPodExec(message: CommandInteraction<CacheType>): Promise<void> {
+    return message.reply({
+      files: [
+        {
+          name: "response.json",
+          attachment: Buffer.from(
+            await this.apiService.execPod(
+              message.options.getString("id"),
+              message.options.getString("command"),
+            ),
+            "utf8",
+          ),
+        },
+      ],
+    } as MessagePayload);
+  }
+
+  // FIXME: Be able to dynamically update value
+  async voidGetLink(message: CommandInteraction<CacheType>): Promise<void> {
+    return message.reply(
+      `${process.env.VOID_URL}/${message.options.getString("name")}`,
     );
   }
 }

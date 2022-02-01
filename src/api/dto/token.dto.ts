@@ -1,5 +1,5 @@
 export class TokenDto {
-  status: "OK" | "ERR";
+  status: "OK";
   access_token: string;
   refresh_token: string;
 }

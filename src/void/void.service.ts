@@ -7,7 +7,7 @@ import { lastValueFrom } from "rxjs";
 export class VoidService {
   constructor(private readonly httpService: HttpService) {}
 
-  ping(): Promise<string> {
+  ping(): Promise<"pong" | "Unable to reach"> {
     return new Promise((resolve) => {
       lastValueFrom(this.httpService.head(process.env.VOID_URL))
         .then((res: AxiosResponse) => {

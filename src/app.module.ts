@@ -10,6 +10,8 @@ import { LogsModule } from "./logs/logs.module";
 import { WebModule } from "./web/web.module";
 import { ApiModule } from "./api/api.module";
 import { VoidModule } from "./void/void.module";
+import { CronService } from "./cron/cron.service";
+import { RedditModule } from './reddit/reddit.module';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { VoidModule } from "./void/void.module";
     WebModule,
     ApiModule,
     VoidModule,
+    RedditModule,
   ],
   controllers: [AppController],
   providers: [AppService],

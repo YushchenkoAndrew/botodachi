@@ -1,24 +1,21 @@
-import { IsString, IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class MessageDto {
-  @IsOptional()
-  @IsString()
+  @ApiProperty({ example: "OK" })
   stat: string;
 
-  @IsString()
-  name: string;
+  @ApiProperty({ example: "API" })
+  name: "WEB" | "API" | "VOID";
 
-  @IsOptional()
-  @IsString()
+  @ApiPropertyOptional()
   url: string;
 
-  @IsOptional()
-  @IsString()
+  @ApiPropertyOptional({ example: "controllers/bot.go" })
   file: string;
 
-  @IsString()
+  @ApiProperty({ example: "Ohh nooo Cache is broken; Anyway..." })
   message: string;
 
-  @IsOptional()
-  desc: any;
+  @ApiPropertyOptional({ example: "Here we go again" })
+  desc: string;
 }

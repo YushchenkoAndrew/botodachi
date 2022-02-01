@@ -51,6 +51,7 @@ export class DiscordBotGateway {
       },
     );
 
+    // FIXME:
     const data = new SlashCommandBuilder()
       .setName("ping")
       .setDescription("Replies with Pong!")
@@ -100,6 +101,11 @@ export class DiscordBotGateway {
     return this.botService.pingAll(interaction);
   }
 
+  @OnEvent("cmd/meme/")
+  async onMeme(interaction: CommandInteraction<CacheType>) {
+    return this.botService.getMemes(interaction);
+  }
+
   @OnEvent("cmd/web/cache-run")
   async onWebCacheRun(
     interaction: CommandInteraction<CacheType>,
@@ -126,6 +132,25 @@ export class DiscordBotGateway {
     interaction: CommandInteraction<CacheType>,
   ): Promise<void> {
     return this.botService.apiCacheRun(interaction);
+  }
+
+  @OnEvent("cmd/api/get-all")
+  async onApiGetAll(interaction: CommandInteraction<CacheType>): Promise<void> {
+    return this.botService.apiGetAll(interaction);
+  }
+
+  @OnEvent("cmd/api/exec")
+  async onApiPodExec(
+    interaction: CommandInteraction<CacheType>,
+  ): Promise<void> {
+    return this.botService.apiPodExec(interaction);
+  }
+
+  @OnEvent("cmd/void/link")
+  async onVoidGetLink(
+    interaction: CommandInteraction<CacheType>,
+  ): Promise<void> {
+    return this.botService.voidGetLink(interaction);
   }
 
   // NOTE: VOID:
