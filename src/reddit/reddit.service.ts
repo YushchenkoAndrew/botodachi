@@ -1,10 +1,14 @@
 import { HttpService } from "@nestjs/axios";
-import { CACHE_MANAGER, Inject, Injectable } from "@nestjs/common";
+import {
+  CacheInterceptor,
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  UseInterceptors,
+} from "@nestjs/common";
 import { AxiosResponse } from "axios";
 import { Cache } from "cache-manager";
 import { lastValueFrom } from "rxjs";
-import { RedditChildDto } from "./dto/reddit-child.dto";
-import { RedditPostDto } from "./dto/reddit-post.dto";
 import { TokenSuccessDto } from "./dto/token-success.dto";
 
 @Injectable()
@@ -17,6 +21,7 @@ export class RedditService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
+  @UseInterceptors(CacheInterceptor)
   private RedditAuth() {
     return new Promise<string>((resolve, reject) => {
       this.cacheManager.get("REDDIT:Access").then((reply?: string) => {
@@ -51,13 +56,14 @@ export class RedditService {
     });
   }
 
-  getPostFromSubreddit(subreddit, type: string, limit: number = 30) {
+  getPostFromSubreddit(subreddit, type, after: string, limit: number = 30) {
     return new Promise<any>((resolve, reject) => {
       this.RedditAuth()
         .then((token) => {
           lastValueFrom(
             this.httpService.get(
-              `${this.OAUTH_URL}/r/${subreddit}/${type}?limit=${limit}`,
+              `${this.OAUTH_URL}/r/${subreddit}/${type}?limit=${limit}&` +
+                (after ? `after=${after}` : ""),
               {
                 headers: {
                   Authorization: `bearer ${token}`,

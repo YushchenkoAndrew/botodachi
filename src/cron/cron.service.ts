@@ -1,9 +1,11 @@
 import {
+  CacheInterceptor,
   CACHE_MANAGER,
   HttpStatus,
   Inject,
   Injectable,
   Logger,
+  UseInterceptors,
 } from "@nestjs/common";
 import { Cron, SchedulerRegistry } from "@nestjs/schedule";
 import { Cache } from "cache-manager";
@@ -97,6 +99,7 @@ export class CronService {
   //   });
   // }
 
+  @UseInterceptors(CacheInterceptor)
   getSubscription(id: string, res: Response): Promise<CronEntity | void> {
     return new Promise<CronEntity | void>(async (resolve) => {
       const entity = (await this.cacheManager.get<string>("CRON:" + id)) ?? "";
@@ -106,6 +109,7 @@ export class CronService {
     });
   }
 
+  @UseInterceptors(CacheInterceptor)
   subscribe(body: CreateCronDto): Promise<CronEntity> {
     return new Promise<CronEntity>((resolve) => {
       const id = md5(`${Math.round(Math.random() * 100000 + 500)}`);
@@ -134,6 +138,7 @@ export class CronService {
     });
   }
 
+  @UseInterceptors(CacheInterceptor)
   unsubscribe(id: string): Promise<string> {
     return new Promise<string>(async (resolve) => {
       const entity = (await this.cacheManager.get<string>("CRON:" + id)) ?? "";

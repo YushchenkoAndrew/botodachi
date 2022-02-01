@@ -1,5 +1,11 @@
 import { HttpService } from "@nestjs/axios";
-import { CACHE_MANAGER, Inject, Injectable } from "@nestjs/common";
+import {
+  CacheInterceptor,
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Cache } from "cache-manager";
 import { AxiosResponse } from "axios";
 import md5 from "lib/md5";
@@ -15,6 +21,7 @@ export class ApiService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
+  @UseInterceptors(CacheInterceptor)
   private UpdateTokens(data: TokenDto) {
     this.cacheManager.set("API:Access", data.access_token, { ttl: 15 * 60 });
     this.cacheManager.set("API:Refresh", data.refresh_token, {
@@ -22,11 +29,13 @@ export class ApiService {
     });
   }
 
+  @UseInterceptors(CacheInterceptor)
   private DeleteTokens() {
     this.cacheManager.del("API:Access");
     this.cacheManager.del("API:Refresh");
   }
 
+  @UseInterceptors(CacheInterceptor)
   private ApiAuth(): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       this.cacheManager.get("API:Access").then((reply?: string) => {
