@@ -10,7 +10,7 @@ import {
 import { Cron, SchedulerRegistry } from "@nestjs/schedule";
 import { Cache } from "cache-manager";
 import { CronJob } from "cron";
-import { Client, Message, TextChannel, WebhookClient } from "discord.js";
+import { Client, Message, TextChannel } from "discord.js";
 import md5 from "lib/md5";
 import { Response } from "express";
 import { ApiService } from "src/api/api.service";
@@ -18,6 +18,20 @@ import { VoidService } from "src/void/void.service";
 import { WebService } from "src/web/web.service";
 import { CreateCronDto } from "./dto/create-cron.dto";
 import { CronEntity } from "./entity/cron.entity";
+import { HttpService } from "@nestjs/axios";
+import { lastValueFrom } from "rxjs";
+import { AxiosResponse } from "axios";
+
+class CachedCronJob extends CronJob {
+  constructor(
+    cronTime: string,
+    onTick: () => void,
+    private body: CreateCronDto,
+    private readonly httpService: HttpService,
+  ) {
+    super(cronTime, onTick, undefined, true);
+  }
+}
 
 @Injectable()
 export class CronService {
@@ -27,6 +41,7 @@ export class CronService {
     @Inject("DISCORD_CLIENT") private readonly client: Client<boolean>,
     private readonly schedulerRegistry: SchedulerRegistry,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly httpService: HttpService,
     private readonly webService: WebService,
     private readonly apiService: ApiService,
     private readonly voidService: VoidService,
@@ -111,30 +126,38 @@ export class CronService {
 
   @UseInterceptors(CacheInterceptor)
   subscribe(body: CreateCronDto): Promise<CronEntity> {
-    return new Promise<CronEntity>((resolve) => {
+    return new Promise<CronEntity>(async (resolve) => {
       const id = md5(`${Math.round(Math.random() * 100000 + 500)}`);
-      this.schedulerRegistry.addCronJob(
-        id,
-        new CronJob(body.cronTime, () => {
-          const salt = md5((Math.random() * 10000 + 500).toString());
-          fetch(`${body.url}?key=${md5(salt + process.env.BOT_KEY)}`, {
-            method: body.method.toUpperCase(),
-            headers: { "X-Custom-Header": salt },
-            body: body.data ?? "",
-          })
-            .then((res) => res.json)
-            .then((data) => this.logger.log(data))
-            .catch((err) => this.logger.error(err));
-        }),
+      await this.cacheManager.set(`TOKEN:${id}`, body.token);
+
+      const job = new CachedCronJob(
+        body.cron_time,
+        function () {
+          lastValueFrom(
+            this.httpService.post(`${this.body.url}`, this.body.data ?? "", {
+              headers: {
+                Authorization: `Bear: ${this.body.token}`,
+              },
+            }),
+          )
+            .then((res: AxiosResponse<string>) => {
+              if (
+                res.status == HttpStatus.OK ||
+                res.status == HttpStatus.CREATED
+              ) {
+                this.body.token = md5(
+                  res.data + this.body.token + process.env.BOT_PEPPER,
+                );
+              }
+            })
+            .catch(() => console.log("Ohhh nyo something is broken\n"));
+        },
+        body,
+        this.httpService,
       );
 
-      const res = { id, createdAt: Date().toString(), exec: body };
-      this.cacheManager
-        .set("CRON:" + id, JSON.stringify(res))
-        .then(() => resolve(res))
-        .catch((value) =>
-          this.sendError("Ohhh nyo cache is broken").then(() => resolve(res)),
-        );
+      resolve({ id, exec: body });
+      this.schedulerRegistry.addCronJob(id, job);
     });
   }
 

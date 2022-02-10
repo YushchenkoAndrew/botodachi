@@ -1,3 +1,4 @@
+import { HttpModule } from "@nestjs/axios";
 import { CacheModule, MiddlewareConsumer, Module } from "@nestjs/common";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ApiModule } from "src/api/api.module";
@@ -12,6 +13,7 @@ import { CronService } from "./cron.service";
   imports: [
     ScheduleModule.forRoot(),
     CacheModule.register(),
+    HttpModule,
     DiscordBotModule,
     WebModule,
     ApiModule,
