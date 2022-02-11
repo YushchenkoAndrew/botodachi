@@ -56,10 +56,7 @@ export class CronController {
   @HttpCode(HttpStatus.CREATED)
   @HttpCode(HttpStatus.NOT_FOUND)
   @HttpCode(HttpStatus.UNAUTHORIZED)
-  getInfo(
-    @Param("id") id: string,
-    @Res() res: Response,
-  ): Promise<CronEntity | void> {
+  getInfo(@Param("id") id: string, @Res() res: Response): CronEntity | void {
     return this.cronService.getSubscription(id, res);
   }
 
@@ -75,7 +72,7 @@ export class CronController {
   @Post("/subscribe")
   @HttpCode(HttpStatus.CREATED)
   @HttpCode(HttpStatus.UNAUTHORIZED)
-  postInfo(@Body() body: CreateCronDto): Promise<CronEntity | void> {
+  postInfo(@Body() body: CreateCronDto): CronEntity | void {
     return this.cronService.subscribe(body);
   }
 
@@ -91,7 +88,7 @@ export class CronController {
   @Delete("/subscribe/:id")
   @HttpCode(HttpStatus.OK)
   @HttpCode(HttpStatus.UNAUTHORIZED)
-  postAlert(@Param("id") id: string): Promise<string> {
-    return this.cronService.unsubscribe(id);
+  postAlert(@Param("id") id: string, @Res() res: Response): void {
+    return this.cronService.unsubscribe(id, res);
   }
 }
