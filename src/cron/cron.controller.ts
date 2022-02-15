@@ -89,6 +89,6 @@ export class CronController {
   @HttpCode(HttpStatus.OK)
   @HttpCode(HttpStatus.UNAUTHORIZED)
   postAlert(@Param("id") id: string, @Res() res: Response): void {
-    return this.cronService.unsubscribe(id, res);
+    this.cronService.unsubscribe(id, res);
   }
 }
