@@ -1,5 +1,13 @@
 .git
+.gitignore
+
+.dockerignore
 *Dockerfile*
+
+# Build dependencies
+dist
 node_modules
 kuberentes/
+
+# Environment (contains sensitive data)
 .env

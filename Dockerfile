@@ -1,5 +1,5 @@
 # Builder
-FROM node:14-alpine AS builder
+FROM node:17-alpine AS builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN npm run build && npm prune --production
 
 
 # Runner
-FROM node:14-alpine AS runner
+FROM node:17-alpine AS runner
 
 WORKDIR /app
 
