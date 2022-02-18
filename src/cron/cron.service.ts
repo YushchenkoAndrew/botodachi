@@ -97,7 +97,7 @@ export class CronService {
     });
   }
 
-  @Cron("* 55 */3 * * *")
+  @Cron("00 55 */3 * * *")
   private FlushWebCache(): Promise<void> {
     return new Promise<void>(async (resolve) => {
       resolve(this.logger.log(await this.webService.cacheUpload()));
