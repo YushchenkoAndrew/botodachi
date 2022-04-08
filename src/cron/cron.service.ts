@@ -11,7 +11,6 @@ import { Cron, SchedulerRegistry } from "@nestjs/schedule";
 import { Cache } from "cache-manager";
 import { CronJob } from "cron";
 import { Client, Message, TextChannel } from "discord.js";
-import md5 from "lib/md5";
 import { Response } from "express";
 import { ApiService } from "src/api/api.service";
 import { VoidService } from "src/void/void.service";
@@ -20,7 +19,8 @@ import { CreateCronDto } from "./dto/create-cron.dto";
 import { CronEntity } from "./entity/cron.entity";
 import { HttpService } from "@nestjs/axios";
 import { lastValueFrom } from "rxjs";
-import { AxiosResponse } from "axios";
+import { v4 as uuid } from "uuid";
+import { UpdateCronDto } from "./dto/update-cron.dto";
 
 class CachedCronJob extends CronJob {
   constructor(
@@ -119,52 +119,66 @@ export class CronService {
   // }
 
   @UseInterceptors(CacheInterceptor)
-  getSubscription(id: string, res: Response): CronEntity | void {
+  readSubscription(id: string, res: Response) {
     const job = this.schedulerRegistry.getCronJob(id) as CachedCronJob;
-    if (job) return { id, exec: job.GetBody() };
-    res.send(HttpStatus.NOT_FOUND);
+    if (job) return res.status(HttpStatus.OK).send({ id, exec: job.GetBody() });
+    res.status(HttpStatus.NOT_FOUND).send();
   }
 
   @UseInterceptors(CacheInterceptor)
-  subscribe(body: CreateCronDto): CronEntity {
-    const id = md5(`${Math.round(Math.random() * 100000 + 500)}`);
+  updateSubscription(id: string, body: UpdateCronDto, res: Response) {
+    const job = this.schedulerRegistry.getCronJob(id) as CachedCronJob;
+    if (!job) return res.status(HttpStatus.NOT_FOUND).send();
+
+    job.stop();
+    this.schedulerRegistry.deleteCronJob(id);
+
+    const prev = job.GetBody();
+    return this.subscribe(
+      {
+        cron_time: body.cron_time || prev.cron_time,
+        method: body.method || prev.method,
+        token: body.token || prev.token,
+        url: body.url || prev.url,
+        data: body.data || prev.data,
+      },
+      res,
+    );
+  }
+
+  @UseInterceptors(CacheInterceptor)
+  subscribe(body: CreateCronDto, res: Response) {
     const job = new CachedCronJob(
       body.cron_time,
       function () {
+        if (!this.httpService[this.body.method]) return;
+
         lastValueFrom(
-          this.httpService.post(`${this.body.url}`, this.body.data ?? "", {
-            headers: {
-              Authorization: `Bear: ${this.body.token}`,
-            },
-          }),
-        )
-          .then((res: AxiosResponse<string>) => {
-            if (
-              res.status == HttpStatus.OK ||
-              res.status == HttpStatus.CREATED
-            ) {
-              this.body.token = md5(
-                res.data + this.body.token + process.env.BOT_PEPPER,
-              );
-            }
-          })
-          .catch(() => console.log("Ohhh nyo something is broken\n"));
+          this.httpService[this.body.method](
+            ...[
+              this.body.url,
+              this.body.data,
+              { headers: { Authorization: `Bear: ${this.body.token}` } },
+            ].filter((item) => item),
+          ),
+        ).catch(() => console.log("Ohhh nyo something is broken\n"));
       },
       body,
       this.httpService,
     );
 
+    const id = uuid();
     this.schedulerRegistry.addCronJob(id, job);
-    return { id, exec: body };
+    return res.status(HttpStatus.CREATED).send({ id, exec: body });
   }
 
   @UseInterceptors(CacheInterceptor)
   unsubscribe(id: string, res: Response) {
     const job = this.schedulerRegistry.getCronJob(id);
-    if (!job) return res.send(HttpStatus.NOT_FOUND);
+    if (!job) return res.status(HttpStatus.NOT_FOUND).send();
 
     job.stop();
     this.schedulerRegistry.deleteCronJob(id);
-    res.send(HttpStatus.OK);
+    res.status(HttpStatus.OK).send();
   }
 }
