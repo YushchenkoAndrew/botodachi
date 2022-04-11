@@ -18,9 +18,10 @@ import { WebService } from "src/web/web.service";
 import { CreateCronDto } from "./dto/create-cron.dto";
 import { CronEntity } from "./entity/cron.entity";
 import { HttpService } from "@nestjs/axios";
-import { lastValueFrom } from "rxjs";
+import { lastValueFrom, Observable } from "rxjs";
 import { v4 as uuid } from "uuid";
 import { UpdateCronDto } from "./dto/update-cron.dto";
+import { AxiosResponse } from "axios";
 
 class CachedCronJob extends CronJob {
   constructor(
@@ -34,6 +35,33 @@ class CachedCronJob extends CronJob {
 
   GetBody(): CreateCronDto {
     return this.body;
+  }
+
+  FormReq(): Observable<AxiosResponse<any, any>> | null {
+    switch (this.body.method) {
+      case "get":
+        return this.httpService.get(this.body.url, {
+          headers: { Authorization: `Bear: ${this.body.token}` },
+        });
+
+      case "post":
+        return this.httpService.post(this.body.url, this.body.data, {
+          headers: { Authorization: `Bear: ${this.body.token}` },
+        });
+
+      case "put":
+        return this.httpService.put(this.body.url, this.body.data, {
+          headers: { Authorization: `Bear: ${this.body.token}` },
+        });
+
+      case "delete":
+        return this.httpService.delete(this.body.url, {
+          headers: { Authorization: `Bear: ${this.body.token}` },
+        });
+
+      default:
+        return null;
+    }
   }
 }
 
@@ -119,16 +147,27 @@ export class CronService {
   // }
 
   @UseInterceptors(CacheInterceptor)
-  readSubscription(id: string, res: Response) {
-    const job = this.schedulerRegistry.getCronJob(id) as CachedCronJob;
-    if (job) return res.status(HttpStatus.OK).send({ id, exec: job.GetBody() });
-    res.status(HttpStatus.NOT_FOUND).send();
+  readSubscription(id: string): CronEntity | null {
+    const jobs = this.schedulerRegistry.getCronJobs() as Map<
+      string,
+      CachedCronJob
+    >;
+    for (const key of Array.from(jobs.keys())) {
+      if (key == id) {
+        return { id, exec: jobs.get(key).GetBody() };
+      }
+    }
+
+    return null;
   }
 
   @UseInterceptors(CacheInterceptor)
   updateSubscription(id: string, body: UpdateCronDto, res: Response) {
+    if (!this.readSubscription(id)) {
+      return res.status(HttpStatus.NOT_FOUND).send();
+    }
+
     const job = this.schedulerRegistry.getCronJob(id) as CachedCronJob;
-    if (!job) return res.status(HttpStatus.NOT_FOUND).send();
 
     job.stop();
     this.schedulerRegistry.deleteCronJob(id);
@@ -151,23 +190,19 @@ export class CronService {
     const job = new CachedCronJob(
       body.cron_time,
       function () {
-        if (!this.httpService[this.body.method]) return;
+        const req = this.FormReq();
+        if (!req) return;
 
-        lastValueFrom(
-          this.httpService[this.body.method](
-            ...[
-              this.body.url,
-              this.body.data,
-              { headers: { Authorization: `Bear: ${this.body.token}` } },
-            ].filter((item) => item),
-          ),
-        ).catch(() => console.log("Ohhh nyo something is broken\n"));
+        lastValueFrom(req).catch((err) =>
+          console.log(`Ohhh nyo something is broken\n: ${err}`),
+        );
       },
       body,
       this.httpService,
     );
 
     const id = uuid();
+    this.logger.log(`Create new cron id=${id}`);
     this.schedulerRegistry.addCronJob(id, job);
     return res.status(HttpStatus.CREATED).send({ id, exec: body });
   }

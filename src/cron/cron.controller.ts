@@ -59,7 +59,8 @@ export class CronController {
   @HttpCode(HttpStatus.NOT_FOUND)
   @HttpCode(HttpStatus.UNAUTHORIZED)
   getInfo(@Param("id") id: string, @Res() res: Response) {
-    this.cronService.readSubscription(id, res);
+    const data = this.cronService.readSubscription(id);
+    res.status(data ? HttpStatus.OK : HttpStatus.NOT_FOUND).send(data);
   }
 
   @ApiBearerAuth("Authorization")
