@@ -1,73 +1,56 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Botodachi
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## A simple bot Server used as for creating dynamic cron jobs & microservices log collector & Discord bot
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This microservice project is a **Part 4** of **'Web-Based Project Management System'**. 
+ * [Part 1 'WEB Server'](https://github.com/YushchenkoAndrew/mortis-grimreaper)
+ * [Part 2 'API Server'](https://github.com/YushchenkoAndrew/grape)
+ * [Part 3 'File Server'](https://github.com/YushchenkoAndrew/void)
+ * [Part 4 'bot'](https://github.com/YushchenkoAndrew/botodachi)
 
-## Description
+![System](/img/System.jpg)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+So I guess you wondering, why I called it *'botodachi'*. Ehh, you know, 'bot' + 'tomodachi' => 'botodachi'. This one is quite simple
 
-## Installation
+Anyway, this project is a log collector for whole microservice system **'Web-Based Project Management System'**, plus it has some useful features such as CRUD for *cron-jobs*
 
-```bash
-$ npm install
+
+Basic summary:
+* *discord-bot*
+  * /ping - Simple ping/pong request
+  * /web cache-run - Execute specific command directly at **WEB Server** Redis
+  * /api cache-run - Execute specific command directly at **API Server** Redis
+  * /api get-all [name] - Show a response from **API Server**
+
+
+*(More information about routes you can find with swagger docs: http://127.0.0.1:3000/bot/docs)*
+
+## Diagram
+![Diagram](/img/botodachi.jpg)
+
+## Cron job life cycle
+![cron](/img/cron.jpg)
+
+## How to use this project
+1. Clone this repo
+2. Copy .env.template to .env
+```
+cp .env.template .env
+```
+3. Configure a .env
+4. Start the project
+```
+npm run start:dev
 ```
 
-## Running the app
 
-```bash
-# development
-$ npm run start
+Now you can check if api is started by sending a **GET** request to http://localhost:3000/bot/ping
 
-# watch mode
-$ npm run start:dev
+Swagger docs about routes you can find at http://127.0.0.1:31337/api/swagger/index.html
 
-# production mode
-$ npm run start:prod
-```
+## Found a bug ?
+Found something strange or just want to improve this project, just send a PR.
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+## What's not implemented yet / Known issues
+- [ ] Project test coverage 
+- [ ] Finish impl of *[In progress]* logic
